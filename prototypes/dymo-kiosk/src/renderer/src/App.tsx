@@ -27,16 +27,10 @@ function App(): React.JSX.Element {
   const student = students.find((person) => person.id === selectedId) ?? students[0]
 
   async function simulatePrint(): Promise<void> {
-  setMessage('Preparing simulated label…')
+  setMessage('Preparing simulated label...')
 
   try {
-    const electronWindow = window as Window & {
-      api: {
-        simulateStudentLabel: (studentId: string) => Promise<string>
-      }
-    }
-
-    const result = await electronWindow.api.simulateStudentLabel(student.id)
+    const result = await window.api.simulateStudentLabel(student.id)
     setMessage(result)
   } catch (error) {
     setMessage(
