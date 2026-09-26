@@ -49,10 +49,16 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  // Temporary Phase 0 simulator. No physical printing occurs here.
+ipcMain.handle('label:simulate-student', (_event, studentId: unknown): string => {
+  if (studentId !== 'student-1' && studentId !== 'student-2') {
+    throw new Error('Unknown sample student')
+  }
 
-  createWindow()
+  return `Simulation complete for ${studentId}. No printer was used.`
+})
+
+createWindow()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

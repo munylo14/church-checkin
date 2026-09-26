@@ -26,9 +26,26 @@ function App(): React.JSX.Element {
 
   const student = students.find((person) => person.id === selectedId) ?? students[0]
 
-  function simulatePrint(): void {
-    setMessage(`Simulation complete: prepared a student label for ${student.name}. No printer was used.`)
+  async function simulatePrint(): Promise<void> {
+  setMessage('Preparing simulated label…')
+
+  try {
+    const electronWindow = window as Window & {
+      api: {
+        simulateStudentLabel: (studentId: string) => Promise<string>
+      }
+    }
+
+    const result = await electronWindow.api.simulateStudentLabel(student.id)
+    setMessage(result)
+  } catch (error) {
+    setMessage(
+      error instanceof Error
+        ? `Simulation failed: ${error.message}`
+        : 'Simulation failed: unknown error'
+    )
   }
+}
 
   return (
     <main
