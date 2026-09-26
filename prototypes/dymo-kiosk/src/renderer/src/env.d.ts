@@ -3,5 +3,6 @@
 interface Window {
   api: {
     simulateStudentLabel: (studentId: string) => Promise<string>
+    listPrinters: () => Promise<{ name: string; displayName: string }[]>
   }
 }

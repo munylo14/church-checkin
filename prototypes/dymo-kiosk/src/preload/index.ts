@@ -3,7 +3,9 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 const api = {
   simulateStudentLabel: (studentId: string): Promise<string> =>
-    ipcRenderer.invoke('label:simulate-student', studentId)
+    ipcRenderer.invoke('label:simulate-student', studentId),
+  listPrinters: (): Promise<{ name: string; displayName: string }[]> =>
+    ipcRenderer.invoke('printers:list')
 }
 
 if (process.contextIsolated) {

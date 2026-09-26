@@ -50,7 +50,16 @@ app.whenReady().then(() => {
   })
 
   // Temporary Phase 0 simulator. No physical printing occurs here.
-ipcMain.handle('label:simulate-student', (_event, studentId: unknown): string => {
+  ipcMain.handle('printers:list', async (event) => {
+    const printers = await event.sender.getPrintersAsync()
+
+    return printers.map((printer) => ({
+      name: printer.name,
+      displayName: printer.displayName
+    }))
+  })
+
+  ipcMain.handle('label:simulate-student', (_event, studentId: unknown): string => {
   if (studentId !== 'student-1' && studentId !== 'student-2') {
     throw new Error('Unknown sample student')
   }
