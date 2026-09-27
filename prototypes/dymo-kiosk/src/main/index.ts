@@ -67,6 +67,98 @@ app.whenReady().then(() => {
   return `Simulation complete for ${studentId}. No printer was used.`
 })
 
+ipcMain.handle('label:print-test', async (event, printerName: unknown): Promise<string> => {
+  if (typeof printerName !== 'string' || printerName.length === 0) {
+    throw new Error('Select a printer first.')
+  }
+
+  const installedPrinters = await event.sender.getPrintersAsync()
+  if (!installedPrinters.some((printer) => printer.name === printerName)) {
+    throw new Error('The selected printer is no longer installed. Refresh the printer list.')
+  }
+
+  // This window contains only fixed sample data. No real person information is used.
+  const printWindow = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  })
+
+  const labelHtml = `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: 2.3125in 4in; margin: 0; }
+    html, body {
+      width: 2.3125in;
+      height: 4in;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: black;
+      background: white;
+    }
+    .label {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      padding: 0.18in;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.24in;
+      text-align: center;
+    }
+    .name { font-size: 19pt; font-weight: bold; }
+    .grade { font-size: 16pt; }
+    .code { font-size: 24pt; font-weight: bold; letter-spacing: 0.08em; }
+  </style>
+</head>
+<body>
+  <div class="label">
+    <div class="name">TEST STUDENT</div>
+    <div class="grade">Grade 7</div>
+    <div class="code">ABC123</div>
+  </div>
+</body>
+</html>`
+
+  try {
+    await printWindow.loadURL(
+      `data:text/html;charset=utf-8,${encodeURIComponent(labelHtml)}`
+    )
+
+    return await new Promise<string>((resolve, reject) => {
+      printWindow.webContents.print(
+        {
+          silent: true,
+          deviceName: printerName,
+          copies: 1,
+          margins: { marginType: 'none' },
+          pageSize: {
+            width: 58738,  // 2-5/16 inches, in microns
+            height: 101600  // 4 inches, in microns
+          }
+        },
+        (success, failureReason) => {
+          if (success) {
+            resolve(`Test label submitted to ${printerName}. Inspect the physical label.`)
+          } else {
+            reject(new Error(failureReason || 'The print job failed.'))
+          }
+        }
+      )
+    })
+  } finally {
+    if (!printWindow.isDestroyed()) printWindow.close()
+  }
+})
+
 createWindow()
 
   app.on('activate', function () {

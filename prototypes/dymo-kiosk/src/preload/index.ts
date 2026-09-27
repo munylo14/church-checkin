@@ -5,7 +5,9 @@ const api = {
   simulateStudentLabel: (studentId: string): Promise<string> =>
     ipcRenderer.invoke('label:simulate-student', studentId),
   listPrinters: (): Promise<{ name: string; displayName: string }[]> =>
-    ipcRenderer.invoke('printers:list')
+    ipcRenderer.invoke('printers:list'),
+  printTestLabel: (printerName: string): Promise<string> =>
+  ipcRenderer.invoke('label:print-test', printerName)
 }
 
 if (process.contextIsolated) {

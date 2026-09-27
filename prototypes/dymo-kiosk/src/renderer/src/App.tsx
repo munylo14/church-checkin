@@ -77,6 +77,26 @@ function App(): React.JSX.Element {
     }
   }
 
+  async function printPhysicalTestLabel(): Promise<void> {
+  if (!selectedPrinter) {
+    setMessage('Select a printer before printing a physical test label.')
+    return
+  }
+
+  setMessage(`Submitting one test label to ${selectedPrinter}...`)
+
+  try {
+    const result = await window.api.printTestLabel(selectedPrinter)
+    setMessage(result)
+  } catch (error) {
+    setMessage(
+      error instanceof Error
+        ? `Physical print failed: ${error.message}`
+        : 'Physical print failed: unknown error'
+    )
+  }
+}
+
   return (
     <main
       style={{
@@ -164,6 +184,13 @@ function App(): React.JSX.Element {
 
       <button type="button" onClick={simulatePrint} style={buttonStyle}>
         Simulate printing student label
+      </button>
+      <button
+        type="button"
+        onClick={printPhysicalTestLabel}
+        style={{ ...buttonStyle, marginLeft: '12px' }}
+      >
+        Print one physical test label
       </button>
       {message && <p role="status">{message}</p>}
     </main>
